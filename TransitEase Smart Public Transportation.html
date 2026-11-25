@@ -1,0 +1,2226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TransitEase — Smart Public Transportation Platform</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <!-- JSZip for instant client-side ZIP download of separated source files -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <style id="main-stylesheet">
+    /* ==========================================================================
+       TRANSITEASE DESIGN SYSTEM & CSS3 VARIABLES
+       ========================================================================== */
+    :root {
+      --bg-app: #f4f7fb;
+      --bg-surface: #ffffff;
+      --bg-subtle: #f8fafc;
+      --sidebar-bg: #0f172a;
+      --sidebar-hover: #1e293b;
+      --sidebar-active: #2563eb;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #eff6ff;
+      --secondary: #0ea5e9;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-light: #94a3b8;
+      --border-color: #e2e8f0;
+      --success: #10b981;
+      --success-bg: #ecfdf5;
+      --success-text: #065f46;
+      --warning: #f59e0b;
+      --warning-bg: #fffbeb;
+      --warning-text: #92400e;
+      --danger: #ef4444;
+      --danger-bg: #fef2f2;
+      --danger-text: #991b1b;
+      --info: #3b82f6;
+      --info-bg: #eff6ff;
+      --info-text: #1e40af;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+      --shadow-lg: 0 12px 28px rgba(15, 23, 42, 0.14);
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-app);
+      color: var(--text-main);
+      line-height: 1.5;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    button, input, select {
+      font-family: inherit;
+    }
+
+    /* ==========================================================================
+       APP LAYOUT & SIDEBAR NAVIGATION
+       ========================================================================== */
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 270px;
+      background: var(--sidebar-bg);
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 1000;
+      transition: transform 0.3s ease;
+      box-shadow: 4px 0 24px rgba(15, 23, 42, 0.12);
+    }
+
+    .sidebar-header {
+      padding: 24px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #3b82f6, #06b6d4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+
+    .brand-text h1 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+    }
+
+    .brand-text span {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      display: block;
+      font-weight: 500;
+    }
+
+    .close-sidebar-btn {
+      display: none;
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 8px;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 18px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      overflow-y: auto;
+    }
+
+    .nav-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #64748b;
+      font-weight: 700;
+      padding: 8px 12px 4px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      color: #cbd5e1;
+      background: transparent;
+      border: none;
+      width: 100%;
+      text-align: left;
+      font-size: 0.92rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+    }
+
+    .nav-item:hover {
+      background: var(--sidebar-hover);
+      color: #ffffff;
+    }
+
+    .nav-item.active {
+      background: var(--sidebar-active);
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+    }
+
+    .nav-badge {
+      margin-left: auto;
+      background: rgba(255, 255, 255, 0.16);
+      color: #ffffff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+
+    .nav-item.active .nav-badge {
+      background: #ffffff;
+      color: var(--primary);
+    }
+
+    .sidebar-footer {
+      padding: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .demo-pill {
+      background: rgba(14, 165, 233, 0.14);
+      border: 1px solid rgba(14, 165, 233, 0.3);
+      color: #7dd3fc;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.76rem;
+      line-height: 1.4;
+    }
+
+    .download-zip-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #ffffff;
+      border: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    }
+
+    .download-zip-btn:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+    }
+
+    /* ==========================================================================
+       MAIN CONTENT & TOP HEADER
+       ========================================================================== */
+    .main-wrapper {
+      flex: 1;
+      margin-left: 270px;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .topbar {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 900;
+      gap: 16px;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 9px 11px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+    }
+
+    .page-heading h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .page-heading p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--success-bg);
+      color: var(--success-text);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      border: 1px solid #a7f3d0;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+      70% { box-shadow: 0 0 0 7px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    .content-area {
+      padding: 28px;
+      max-width: 1360px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .page-section {
+      display: none;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .page-section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ==========================================================================
+       CARDS, HERO BANNER, STATS & BUTTONS
+       ========================================================================== */
+    .hero-banner {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 60%, #2563eb 100%);
+      color: #ffffff;
+      border-radius: var(--radius-lg);
+      padding: 30px;
+      margin-bottom: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-content {
+      max-width: 640px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      backdrop-filter: blur(4px);
+    }
+
+    .hero-content h3 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      line-height: 1.25;
+    }
+
+    .hero-content p {
+      color: #dbeafe;
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+    }
+
+    .quick-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+      font-weight: 600;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: var(--transition);
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    .btn-white {
+      background: #ffffff;
+      color: var(--primary-dark);
+    }
+
+    .btn-white:hover {
+      background: #f8fafc;
+      transform: translateY(-1px);
+    }
+
+    .btn-glass {
+      background: rgba(255, 255, 255, 0.14);
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .btn-glass:hover {
+      background: rgba(255, 255, 255, 0.22);
+    }
+
+    .btn-outline {
+      background: var(--bg-surface);
+      color: var(--text-main);
+      border-color: var(--border-color);
+    }
+
+    .btn-outline:hover {
+      background: var(--bg-subtle);
+      border-color: #cbd5e1;
+    }
+
+    .btn-danger {
+      background: var(--danger-bg);
+      color: var(--danger-text);
+      border-color: #fecaca;
+    }
+
+    .btn-danger:hover {
+      background: #fee2e2;
+    }
+
+    .btn-sm {
+      padding: 7px 12px;
+      font-size: 0.8rem;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      transition: var(--transition);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .stat-info span {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .stat-info h4 {
+      font-size: 1.65rem;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.02em;
+    }
+
+    .stat-info small {
+      display: block;
+      margin-top: 6px;
+      font-size: 0.76rem;
+      color: var(--text-muted);
+    }
+
+    .stat-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1.45fr 1fr;
+      gap: 22px;
+    }
+
+    .card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 22px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .card-subtitle {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================================================
+       BADGES & STATUS INDICATORS
+       ========================================================================== */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .badge-bus { background: #e0f2fe; color: #0369a1; }
+    .badge-metro { background: #ede9fe; color: #6d28d9; }
+    .badge-low { background: var(--success-bg); color: var(--success-text); }
+    .badge-moderate { background: var(--warning-bg); color: var(--warning-text); }
+    .badge-high { background: var(--danger-bg); color: var(--danger-text); }
+    .badge-info { background: var(--info-bg); color: var(--info-text); }
+
+    /* ==========================================================================
+       POPULAR ROUTES & ALERT LISTS
+       ========================================================================== */
+    .route-mini-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .route-mini-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      background: var(--bg-subtle);
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .route-code {
+      font-weight: 800;
+      font-size: 0.82rem;
+      padding: 4px 9px;
+      border-radius: 6px;
+      background: var(--primary);
+      color: #ffffff;
+      display: inline-block;
+      margin-right: 8px;
+    }
+
+    .alert-mini-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .alert-mini-item {
+      padding: 14px;
+      border-radius: var(--radius-sm);
+      border-left: 4px solid var(--info);
+      background: var(--bg-subtle);
+    }
+
+    .alert-mini-item.disruption { border-left-color: var(--danger); background: #fff8f8; }
+    .alert-mini-item.information { border-left-color: var(--warning); background: #fffdf5; }
+    .alert-mini-item.normal { border-left-color: var(--success); background: #f6fef9; }
+
+    /* ==========================================================================
+       JOURNEY PLANNER & BOOKING FORM
+       ========================================================================== */
+    .planner-form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 16px;
+      align-items: end;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .form-control {
+      padding: 11px 13px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      background: var(--bg-surface);
+      color: var(--text-main);
+      font-size: 0.9rem;
+      transition: var(--transition);
+      width: 100%;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .journey-results-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 22px;
+    }
+
+    .journey-option-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+    }
+
+    .journey-option-card:hover {
+      border-color: var(--primary);
+      box-shadow: var(--shadow-md);
+    }
+
+    .journey-option-card.selected {
+      border: 2px solid var(--primary);
+      background: #f8fbff;
+    }
+
+    .journey-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 10px;
+      font-size: 0.83rem;
+      color: var(--text-muted);
+    }
+
+    .booking-panel {
+      margin-top: 24px;
+      background: linear-gradient(to right, #ffffff, #f8fafc);
+      border: 2px solid var(--primary);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .price-summary-box {
+      background: var(--primary-light);
+      border: 1px solid #bfdbfe;
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 18px 0;
+    }
+
+    /* ==========================================================================
+       SCHEDULES TABLE & FILTER PILLS
+       ========================================================================== */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .filter-btn {
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-surface);
+      color: var(--text-muted);
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .filter-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .filter-btn.active {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+      background: var(--bg-surface);
+    }
+
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.88rem;
+    }
+
+    th {
+      background: var(--bg-subtle);
+      font-weight: 700;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: #f8fafc;
+    }
+
+    /* ==========================================================================
+       CROWD STATUS PROGRESS BARS
+       ========================================================================== */
+    .crowd-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 18px;
+    }
+
+    .crowd-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 12px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 12px 0 8px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.5s ease;
+    }
+
+    .fill-low { background: var(--success); }
+    .fill-moderate { background: var(--warning); }
+    .fill-high { background: var(--danger); }
+
+    /* ==========================================================================
+       ALERTS CARDS
+       ========================================================================== */
+    .alerts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+      gap: 18px;
+    }
+
+    .alert-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-top: 4px solid var(--info);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .alert-card.disruption { border-top-color: var(--danger); }
+    .alert-card.information { border-top-color: var(--warning); }
+    .alert-card.normal { border-top-color: var(--success); }
+
+    /* ==========================================================================
+       MY TICKETS (BOARDING PASS STYLE CARDS)
+       ========================================================================== */
+    .tickets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .ticket-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ticket-top {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      color: #ffffff;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .ticket-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .ticket-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.86rem;
+      border-bottom: 1px dashed var(--border-color);
+      padding-bottom: 8px;
+    }
+
+    .ticket-row:last-of-type {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .ticket-footer {
+      background: var(--bg-subtle);
+      padding: 12px 20px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 52px 20px;
+      background: var(--bg-surface);
+      border: 1px dashed #cbd5e1;
+      border-radius: var(--radius-md);
+    }
+
+    .notice-banner {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1e40af;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.84rem;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* ==========================================================================
+       TOAST NOTIFICATION & MOBILE OVERLAY
+       ========================================================================== */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #0f172a;
+      color: #ffffff;
+      padding: 14px 20px;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-lg);
+      font-size: 0.88rem;
+      font-weight: 500;
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transform: translateY(120%);
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      z-index: 950;
+    }
+
+    .sidebar-overlay.show {
+      display: block;
+    }
+
+    /* ==========================================================================
+       RESPONSIVE BREAKPOINTS
+       ========================================================================== */
+    @media (max-width: 960px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .close-sidebar-btn, .mobile-menu-btn {
+        display: inline-flex;
+      }
+      .main-wrapper {
+        margin-left: 0;
+      }
+      .topbar {
+        padding: 14px 18px;
+      }
+      .content-area {
+        padding: 18px;
+      }
+      .hero-content h3 {
+        font-size: 1.4rem;
+      }
+      .status-chip {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Mobile Sidebar Backdrop -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="app-container">
+    <!-- ======================================================================
+         SIDEBAR NAVIGATION
+         ====================================================================== -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="brand">
+          <div class="brand-icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="3" width="16" height="15" rx="2"></rect>
+              <path d="M4 11h16"></path>
+              <path d="M12 3v8"></path>
+              <path d="m8 19-2 3"></path>
+              <path d="m18 22-2-3"></path>
+              <circle cx="8" cy="15" r="1"></circle>
+              <circle cx="16" cy="15" r="1"></circle>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <h1>TransitEase</h1>
+            <span>Smart Mobility Hub</span>
+          </div>
+        </div>
+        <button class="close-sidebar-btn" id="closeSidebarBtn" aria-label="Close Menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav" aria-label="Primary Navigation">
+        <div class="nav-label">Commuter Portal</div>
+        <button class="nav-item active" data-page="dashboard">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          Dashboard
+        </button>
+        <button class="nav-item" data-page="planner">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+          Journey Planner
+        </button>
+        <button class="nav-item" data-page="schedules">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          Schedules
+        </button>
+        <button class="nav-item" data-page="crowd">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          Crowd Status
+        </button>
+        <button class="nav-item" data-page="alerts">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          Alerts &amp; Holidays
+          <span class="nav-badge" id="alertNavCount">5</span>
+        </button>
+        <button class="nav-item" data-page="tickets">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"></path><path d="M13 5v2"></path><path d="M13 17v2"></path><path d="M13 11v2"></path></svg>
+          My Tickets
+          <span class="nav-badge" id="ticketNavCount">0</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="demo-pill">
+          <strong>Prototype Mode:</strong> Simulated transit schedules, crowd levels &amp; demo tickets.
+        </div>
+        <button class="download-zip-btn" id="downloadZipBtn" title="Download TransitEase_HTML_CSS_JS.zip">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          Download Project ZIP
+        </button>
+      </div>
+    </aside>
+
+    <!-- ======================================================================
+         MAIN CONTENT WRAPPER
+         ====================================================================== -->
+    <div class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu-btn" id="openSidebarBtn" aria-label="Open Navigation">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <div class="page-heading">
+            <h2 id="topbarTitle">Commuter Dashboard</h2>
+            <p id="topbarSubtitle">Overview of city bus, metro lines, crowd levels &amp; tickets</p>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="status-chip">
+            <span class="pulse-dot"></span>
+            Network Active (Simulated)
+          </div>
+          <button class="btn btn-primary btn-sm" data-nav-target="planner">+ Book Ride</button>
+        </div>
+      </header>
+
+      <main class="content-area">
+        <!-- ==================================================================
+             PAGE 1: DASHBOARD / HOME PAGE
+             ================================================================== -->
+        <section id="page-dashboard" class="page-section active">
+          <div class="hero-banner">
+            <div class="hero-content">
+              <span class="hero-badge">Smart Public Transit • Prototype v1.0</span>
+              <h3>Stress-Free Commuting Starts with Clear Data</h3>
+              <p>Plan routes across Bus &amp; Metro networks, check estimated crowd capacity before boarding, monitor holiday schedule updates, and book instant prototype passes.</p>
+              <div class="quick-actions">
+                <button class="btn btn-white" data-nav-target="planner">Plan a Journey</button>
+                <button class="btn btn-glass" data-nav-target="schedules">View Schedules</button>
+                <button class="btn btn-glass" data-nav-target="crowd">Check Crowd Status</button>
+                <button class="btn btn-glass" data-nav-target="alerts">View Alerts</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-info">
+                <span>Total Routes Available</span>
+                <h4 id="statTotalRoutes">6</h4>
+                <small>4 Bus Lines • 2 Metro Corridors</small>
+              </div>
+              <div class="stat-icon" style="background:#eff6ff;color:#2563eb;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-info">
+                <span>Avg. Service Frequency</span>
+                <h4>9 mins</h4>
+                <small>Peak hours across metro &amp; express</small>
+              </div>
+              <div class="stat-icon" style="background:#ecfdf5;color:#10b981;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-info">
+                <span>Network Crowd Level</span>
+                <h4 id="statNetworkCrowd">54%</h4>
+                <small>Moderate load (Simulated Data)</small>
+              </div>
+              <div class="stat-icon" style="background:#fffbeb;color:#f59e0b;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-info">
+                <span>Tickets Booked by You</span>
+                <h4 id="statBookedTickets">0</h4>
+                <small>Saved locally in browser storage</small>
+              </div>
+              <div class="stat-icon" style="background:#f3e8ff;color:#7e22ce;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="dashboard-grid">
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Popular Commuter Routes</h3>
+                  <p class="card-subtitle">High-frequency corridors with live simulated load indicators</p>
+                </div>
+                <button class="btn btn-outline btn-sm" data-nav-target="schedules">All Schedules</button>
+              </div>
+              <div class="route-mini-list" id="dashboardPopularRoutes"></div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Latest Service Alerts</h3>
+                  <p class="card-subtitle">Advisories &amp; holiday schedule updates</p>
+                </div>
+                <button class="btn btn-outline btn-sm" data-nav-target="alerts">All Alerts</button>
+              </div>
+              <div class="alert-mini-list" id="dashboardLatestAlerts"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             PAGE 2: JOURNEY PLANNER
+             ================================================================== -->
+        <section id="page-planner" class="page-section">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Smart Journey Planner</h3>
+                <p class="card-subtitle">Compare Bus and Metro options by duration, crowd level, and fare</p>
+              </div>
+            </div>
+
+            <form id="journeySearchForm" class="planner-form-grid">
+              <div class="form-group">
+                <label for="originInput">Starting Location</label>
+                <input type="text" id="originInput" class="form-control" list="stopsDatalist" placeholder="e.g., Central Station" value="Central Station" required />
+              </div>
+
+              <div class="form-group">
+                <label for="destinationInput">Destination</label>
+                <input type="text" id="destinationInput" class="form-control" list="stopsDatalist" placeholder="e.g., International Airport" value="International Airport" required />
+              </div>
+
+              <div class="form-group">
+                <label for="travelDateInput">Travel Date</label>
+                <input type="date" id="travelDateInput" class="form-control" required />
+              </div>
+
+              <div class="form-group">
+                <label for="departureTimeInput">Departure Time</label>
+                <input type="time" id="departureTimeInput" class="form-control" value="09:00" required />
+              </div>
+
+              <div class="form-group">
+                <button type="submit" class="btn btn-primary" style="width:100%;height:43px;">
+                  Search Routes
+                </button>
+              </div>
+            </form>
+
+            <datalist id="stopsDatalist">
+              <option value="Central Station"></option>
+              <option value="International Airport"></option>
+              <option value="Tech Park North"></option>
+              <option value="University Campus"></option>
+              <option value="Downtown Civic Center"></option>
+              <option value="Harborfront Terminal"></option>
+              <option value="Westside Mall"></option>
+              <option value="Eastgate Business District"></option>
+            </datalist>
+          </div>
+
+          <div id="journeyResultsContainer" class="journey-results-grid"></div>
+
+          <!-- Booking Form Panel (Shown when a route is selected) -->
+          <div id="bookingFormPanel" class="booking-panel" style="display:none;">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Complete Prototype Ticket Booking</h3>
+                <p class="card-subtitle" id="selectedRouteSummary">Selected Route</p>
+              </div>
+              <button type="button" class="btn btn-outline btn-sm" id="cancelSelectionBtn">Close</button>
+            </div>
+
+            <form id="ticketBookingForm" class="planner-form-grid">
+              <div class="form-group">
+                <label for="passengerNameInput">Passenger Full Name</label>
+                <input type="text" id="passengerNameInput" class="form-control" placeholder="Enter passenger name" required />
+              </div>
+
+              <div class="form-group">
+                <label for="passengerCountInput">Number of Passengers</label>
+                <input type="number" id="passengerCountInput" class="form-control" min="1" max="10" value="1" required />
+              </div>
+
+              <div class="form-group">
+                <label for="ticketTypeSelect">Ticket Type</label>
+                <select id="ticketTypeSelect" class="form-control">
+                  <option value="Single">Single Journey (1x Fare)</option>
+                  <option value="Return">Return Trip (2x Fare)</option>
+                </select>
+              </div>
+            </form>
+
+            <div class="price-summary-box">
+              <div>
+                <strong style="display:block;color:#1e3a8a;">Estimated Total Fare</strong>
+                <small style="color:#3b82f6;">Prototype ticket • Stored locally in your browser</small>
+              </div>
+              <div style="font-size:1.5rem;font-weight:800;color:#1d4ed8;" id="estimatedTotalPrice">$0.00</div>
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;gap:12px;">
+              <button type="submit" form="ticketBookingForm" class="btn btn-primary">Confirm Booking &amp; Generate Ticket</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             PAGE 3: SCHEDULES PAGE
+             ================================================================== -->
+        <section id="page-schedules" class="page-section">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Master Transit Timetables</h3>
+                <p class="card-subtitle">Filter schedules across City Bus, Express Airport Connectors, and Metro lines</p>
+              </div>
+              <div class="filter-bar" id="scheduleFilterBar" style="margin-bottom:0;">
+                <button class="filter-btn active" data-filter="All">All Services</button>
+                <button class="filter-btn" data-filter="Bus">Bus</button>
+                <button class="filter-btn" data-filter="Metro">Metro</button>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Route No.</th>
+                    <th>Type</th>
+                    <th>Route Name</th>
+                    <th>Origin &rarr; Destination</th>
+                    <th>First Departure</th>
+                    <th>Frequency</th>
+                    <th>Est. Duration</th>
+                    <th>Base Fare</th>
+                  </tr>
+                </thead>
+                <tbody id="schedulesTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             PAGE 4: CROWD STATUS PAGE
+             ================================================================== -->
+        <section id="page-crowd" class="page-section">
+          <div class="notice-banner">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span><strong>Simulated Demo Data:</strong> Crowd percentages below represent estimated prototype commuter occupancy levels to help you choose less congested services.</span>
+          </div>
+
+          <div class="card" style="margin-bottom:22px;">
+            <div class="card-header" style="margin-bottom:8px;">
+              <div>
+                <h3 class="card-title">Overall Network Occupancy</h3>
+                <p class="card-subtitle">Aggregated simulated passenger load across all active routes</p>
+              </div>
+              <span class="badge badge-moderate" id="overallCrowdBadge">54% • Moderate Crowd</span>
+            </div>
+            <div class="progress-track" style="height:16px;">
+              <div class="progress-fill fill-moderate" id="overallCrowdBar" style="width:54%;"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:0.78rem;color:var(--text-muted);margin-top:8px;">
+              <span>Green: Low (&lt;45%)</span>
+              <span>Yellow/Orange: Moderate (45%–74%)</span>
+              <span>Red: High (&ge;75%)</span>
+            </div>
+          </div>
+
+          <div class="crowd-grid" id="crowdStatusGrid"></div>
+        </section>
+
+        <!-- ==================================================================
+             PAGE 5: ALERTS & HOLIDAYS PAGE
+             ================================================================== -->
+        <section id="page-alerts" class="page-section">
+          <div class="card" style="margin-bottom:22px;">
+            <div class="card-header" style="margin-bottom:0;">
+              <div>
+                <h3 class="card-title">Service Advisories &amp; Holiday Schedules</h3>
+                <p class="card-subtitle">Stay informed about route diversions, maintenance, and public holiday frequencies</p>
+              </div>
+              <div class="filter-bar" id="alertFilterBar" style="margin-bottom:0;">
+                <button class="filter-btn active" data-alert-filter="All">All Alerts</button>
+                <button class="filter-btn" data-alert-filter="Disruption">Disruptions</button>
+                <button class="filter-btn" data-alert-filter="Information">Information</button>
+                <button class="filter-btn" data-alert-filter="Normal Service">Normal Service</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="alerts-grid" id="alertsGrid"></div>
+        </section>
+
+        <!-- ==================================================================
+             PAGE 6: MY TICKETS PAGE
+             ================================================================== -->
+        <section id="page-tickets" class="page-section">
+          <div class="notice-banner">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span><strong>Prototype Tickets Notice:</strong> These passes are generated for demonstration purposes using browser LocalStorage and are not valid for real-world transit fare gates.</span>
+          </div>
+
+          <div id="ticketsContainer"></div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Toast Feedback Message -->
+  <div class="toast" id="toastNotification" role="status" aria-live="polite"></div>
+
+  <!-- ========================================================================
+       VANILLA JAVASCRIPT APPLICATION LOGIC
+       ======================================================================== -->
+  <script id="main-script">
+    (function () {
+      'use strict';
+
+      /* ----------------------------------------------------------------------
+         1. SIMULATED TRANSIT DATASET
+         ---------------------------------------------------------------------- */
+      const TRANSIT_ROUTES = [
+        {
+          id: 'R-101',
+          number: 'B-101',
+          type: 'Bus',
+          name: 'City Express Loop',
+          origin: 'Central Station',
+          destination: 'Downtown Civic Center',
+          firstDeparture: '05:30 AM',
+          frequency: '10 mins',
+          duration: '25 mins',
+          stops: 8,
+          fare: 2.50,
+          crowdPercent: 32,
+          crowdLevel: 'Low'
+        },
+        {
+          id: 'R-202',
+          number: 'M-01',
+          type: 'Metro',
+          name: 'Blue Metro Line',
+          origin: 'Central Station',
+          destination: 'Tech Park North',
+          firstDeparture: '05:00 AM',
+          frequency: '5 mins',
+          duration: '18 mins',
+          stops: 6,
+          fare: 3.25,
+          crowdPercent: 78,
+          crowdLevel: 'High'
+        },
+        {
+          id: 'R-303',
+          number: 'A-500',
+          type: 'Bus',
+          name: 'Airport Connector Express',
+          origin: 'Central Station',
+          destination: 'International Airport',
+          firstDeparture: '04:30 AM',
+          frequency: '15 mins',
+          duration: '35 mins',
+          stops: 4,
+          fare: 6.00,
+          crowdPercent: 52,
+          crowdLevel: 'Moderate'
+        },
+        {
+          id: 'R-404',
+          number: 'M-02',
+          type: 'Metro',
+          name: 'Silver Metro Corridor',
+          origin: 'Harborfront Terminal',
+          destination: 'International Airport',
+          firstDeparture: '05:15 AM',
+          frequency: '7 mins',
+          duration: '28 mins',
+          stops: 9,
+          fare: 4.50,
+          crowdPercent: 61,
+          crowdLevel: 'Moderate'
+        },
+        {
+          id: 'R-505',
+          number: 'U-12',
+          type: 'Bus',
+          name: 'University Campus Shuttle',
+          origin: 'Westside Mall',
+          destination: 'University Campus',
+          firstDeparture: '06:00 AM',
+          frequency: '12 mins',
+          duration: '22 mins',
+          stops: 7,
+          fare: 2.00,
+          crowdPercent: 84,
+          crowdLevel: 'High'
+        },
+        {
+          id: 'R-606',
+          number: 'C-300',
+          type: 'Bus',
+          name: 'City Circular Route',
+          origin: 'Eastgate Business District',
+          destination: 'Harborfront Terminal',
+          firstDeparture: '06:15 AM',
+          frequency: '15 mins',
+          duration: '40 mins',
+          stops: 14,
+          fare: 2.75,
+          crowdPercent: 28,
+          crowdLevel: 'Low'
+        }
+      ];
+
+      const SERVICE_ALERTS = [
+        {
+          id: 'ALT-01',
+          category: 'Disruption',
+          title: 'Signal Upgrade Delay on Blue Metro Line',
+          route: 'M-01 • Blue Metro Line',
+          timestamp: 'Today, 08:15 AM',
+          description: 'Trains between Central Station and Tech Park North are experiencing 6–8 minute delays due to automated signal calibration.'
+        },
+        {
+          id: 'ALT-02',
+          category: 'Information',
+          title: 'Upcoming Public Holiday Reduced Frequency Notice',
+          route: 'All Bus & Metro Routes',
+          timestamp: 'Upcoming Holiday Schedule',
+          description: 'On the upcoming National Public Holiday, all City Bus and Metro corridors will operate on a Sunday timetable (15–20 min intervals).'
+        },
+        {
+          id: 'ALT-03',
+          category: 'Disruption',
+          title: 'Downtown Roadwork Detour (Stops 4 & 5)',
+          route: 'B-101 • City Express Loop',
+          timestamp: 'Today, 07:30 AM',
+          description: 'Buses are temporarily diverted via 4th Avenue due to municipal utility work. Expect an extra 5 minutes of travel time.'
+        },
+        {
+          id: 'ALT-04',
+          category: 'Information',
+          title: 'Extended Late-Night Airport Shuttle Service',
+          route: 'A-500 • Airport Connector Express',
+          timestamp: 'Effective This Week',
+          description: 'Additional midnight and 01:00 AM departures have been added from Central Station to International Airport for late arrivals.'
+        },
+        {
+          id: 'ALT-05',
+          category: 'Normal Service',
+          title: 'Silver Metro Corridor & Circular Routes Operating Normally',
+          route: 'M-02 & C-300',
+          timestamp: 'Updated 10 mins ago',
+          description: 'All stations, escalators, and contactless demo fare gates are operating on regular weekday schedules with low-to-moderate occupancy.'
+        }
+      ];
+
+      const STORAGE_KEY = 'transitease_demo_tickets_v1';
+
+      /* ----------------------------------------------------------------------
+         2. APPLICATION STATE & STORAGE HELPERS
+         ---------------------------------------------------------------------- */
+      let state = {
+        activePage: 'dashboard',
+        scheduleFilter: 'All',
+        alertFilter: 'All',
+        searchResults: [],
+        selectedOption: null,
+        tickets: loadTicketsFromStorage()
+      };
+
+      function loadTicketsFromStorage() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          return raw ? JSON.parse(raw) : [];
+        } catch (err) {
+          console.error('Failed to read tickets from LocalStorage:', err);
+          return [];
+        }
+      }
+
+      function saveTicketsToStorage(tickets) {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(tickets));
+        } catch (err) {
+          console.error('Failed to save tickets to LocalStorage:', err);
+        }
+      }
+
+      function showToast(message) {
+        const toast = document.getElementById('toastNotification');
+        toast.textContent = message;
+        toast.classList.add('show');
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(() => {
+          toast.classList.remove('show');
+        }, 3400);
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      /* ----------------------------------------------------------------------
+         3. NAVIGATION & RESPONSIVE SIDEBAR
+         ---------------------------------------------------------------------- */
+      const PAGE_META = {
+        dashboard: {
+          title: 'Commuter Dashboard',
+          subtitle: 'Overview of city bus, metro lines, crowd levels & tickets'
+        },
+        planner: {
+          title: 'Journey Planner',
+          subtitle: 'Search routes, compare options, and book prototype tickets'
+        },
+        schedules: {
+          title: 'Transit Schedules',
+          subtitle: 'Complete timetables and service frequencies for Bus & Metro'
+        },
+        crowd: {
+          title: 'Crowd Status Monitor',
+          subtitle: 'Simulated occupancy indicators across the transit network'
+        },
+        alerts: {
+          title: 'Alerts & Holidays',
+          subtitle: 'Service disruptions, detours, and holiday timetable notices'
+        },
+        tickets: {
+          title: 'My Prototype Tickets',
+          subtitle: 'View and manage your locally stored demo passes'
+        }
+      };
+
+      function navigateTo(pageId) {
+        if (!PAGE_META[pageId]) return;
+        state.activePage = pageId;
+
+        document.querySelectorAll('.page-section').forEach((sec) => {
+          sec.classList.toggle('active', sec.id === `page-${pageId}`);
+        });
+
+        document.querySelectorAll('.nav-item').forEach((btn) => {
+          btn.classList.toggle('active', btn.dataset.page === pageId);
+        });
+
+        document.getElementById('topbarTitle').textContent = PAGE_META[pageId].title;
+        document.getElementById('topbarSubtitle').textContent = PAGE_META[pageId].subtitle;
+
+        closeMobileSidebar();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function openMobileSidebar() {
+        document.getElementById('sidebar').classList.add('open');
+        document.getElementById('sidebarOverlay').classList.add('show');
+      }
+
+      function closeMobileSidebar() {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('show');
+      }
+
+      /* ----------------------------------------------------------------------
+         4. RENDERING FUNCTIONS FOR ALL 6 PAGES
+         ---------------------------------------------------------------------- */
+      function getCrowdBadgeClass(level) {
+        if (level === 'Low') return 'badge-low';
+        if (level === 'Moderate') return 'badge-moderate';
+        return 'badge-high';
+      }
+
+      function renderDashboard() {
+        // Update counters
+        document.getElementById('statTotalRoutes').textContent = TRANSIT_ROUTES.length;
+        const avgCrowd = Math.round(
+          TRANSIT_ROUTES.reduce((acc, r) => acc + r.crowdPercent, 0) / TRANSIT_ROUTES.length
+        );
+        document.getElementById('statNetworkCrowd').textContent = `${avgCrowd}%`;
+        document.getElementById('statBookedTickets').textContent = state.tickets.length;
+        document.getElementById('ticketNavCount').textContent = state.tickets.length;
+        document.getElementById('alertNavCount').textContent = SERVICE_ALERTS.length;
+
+        // Render Popular Routes (Top 4)
+        const popularContainer = document.getElementById('dashboardPopularRoutes');
+        popularContainer.innerHTML = TRANSIT_ROUTES.slice(0, 4).map((r) => `
+          <div class="route-mini-item">
+            <div>
+              <div style="margin-bottom:4px;">
+                <span class="route-code">${escapeHtml(r.number)}</span>
+                <strong>${escapeHtml(r.name)}</strong>
+                <span class="badge ${r.type === 'Metro' ? 'badge-metro' : 'badge-bus'}" style="margin-left:6px;">${r.type}</span>
+              </div>
+              <div style="font-size:0.82rem;color:var(--text-muted);">
+                ${escapeHtml(r.origin)} &rarr; ${escapeHtml(r.destination)} • Every ${r.frequency}
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span class="badge ${getCrowdBadgeClass(r.crowdLevel)}">${r.crowdLevel} (${r.crowdPercent}%)</span>
+              <button class="btn btn-outline btn-sm" onclick="window.quickBookRoute('${r.id}')">Select</button>
+            </div>
+          </div>
+        `).join('');
+
+        // Render Latest Alerts (Top 3)
+        const alertsContainer = document.getElementById('dashboardLatestAlerts');
+        alertsContainer.innerHTML = SERVICE_ALERTS.slice(0, 3).map((a) => {
+          const cls = a.category === 'Disruption' ? 'disruption' : a.category === 'Information' ? 'information' : 'normal';
+          return `
+            <div class="alert-mini-item ${cls}">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;gap:8px;">
+                <strong style="font-size:0.88rem;">${escapeHtml(a.title)}</strong>
+                <span style="font-size:0.74rem;color:var(--text-muted);white-space:nowrap;">${escapeHtml(a.timestamp)}</span>
+              </div>
+              <p style="font-size:0.81rem;color:var(--text-muted);">${escapeHtml(a.description)}</p>
+            </div>
+          `;
+        }).join('');
+      }
+
+      function renderSchedules() {
+        const tbody = document.getElementById('schedulesTableBody');
+        const filtered = state.scheduleFilter === 'All'
+          ? TRANSIT_ROUTES
+          : TRANSIT_ROUTES.filter((r) => r.type === state.scheduleFilter);
+
+        tbody.innerHTML = filtered.map((r) => `
+          <tr>
+            <td><strong>${escapeHtml(r.number)}</strong></td>
+            <td><span class="badge ${r.type === 'Metro' ? 'badge-metro' : 'badge-bus'}">${r.type}</span></td>
+            <td><strong>${escapeHtml(r.name)}</strong></td>
+            <td>${escapeHtml(r.origin)} &rarr; ${escapeHtml(r.destination)}</td>
+            <td>${escapeHtml(r.firstDeparture)}</td>
+            <td>Every ${escapeHtml(r.frequency)}</td>
+            <td>${escapeHtml(r.duration)}</td>
+            <td><strong>$${r.fare.toFixed(2)}</strong></td>
+          </tr>
+        `).join('');
+      }
+
+      function renderCrowdStatus() {
+        const avgCrowd = Math.round(
+          TRANSIT_ROUTES.reduce((acc, r) => acc + r.crowdPercent, 0) / TRANSIT_ROUTES.length
+        );
+        const overallBadge = document.getElementById('overallCrowdBadge');
+        const overallBar = document.getElementById('overallCrowdBar');
+        overallBadge.textContent = `${avgCrowd}% • Moderate Crowd`;
+        overallBar.style.width = `${avgCrowd}%`;
+
+        const grid = document.getElementById('crowdStatusGrid');
+        grid.innerHTML = TRANSIT_ROUTES.map((r) => {
+          const fillClass = r.crowdLevel === 'Low' ? 'fill-low' : r.crowdLevel === 'Moderate' ? 'fill-moderate' : 'fill-high';
+          return `
+            <div class="crowd-card">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+                <div>
+                  <span class="route-code">${escapeHtml(r.number)}</span>
+                  <span class="badge ${r.type === 'Metro' ? 'badge-metro' : 'badge-bus'}">${r.type}</span>
+                  <h4 style="margin-top:8px;font-size:1rem;">${escapeHtml(r.name)}</h4>
+                  <p style="font-size:0.82rem;color:var(--text-muted);">${escapeHtml(r.origin)} &rarr; ${escapeHtml(r.destination)}</p>
+                </div>
+                <span class="badge ${getCrowdBadgeClass(r.crowdLevel)}">${r.crowdLevel} Crowd</span>
+              </div>
+
+              <div class="progress-track">
+                <div class="progress-fill ${fillClass}" style="width:${r.crowdPercent}%;"></div>
+              </div>
+
+              <div style="display:flex;justify-content:space-between;font-size:0.82rem;">
+                <span style="color:var(--text-muted);">Simulated Occupancy</span>
+                <strong>${r.crowdPercent}% Capacity</strong>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      function renderAlerts() {
+        const grid = document.getElementById('alertsGrid');
+        const filtered = state.alertFilter === 'All'
+          ? SERVICE_ALERTS
+          : SERVICE_ALERTS.filter((a) => a.category === state.alertFilter);
+
+        grid.innerHTML = filtered.map((a) => {
+          const cardCls = a.category === 'Disruption' ? 'disruption' : a.category === 'Information' ? 'information' : 'normal';
+          const badgeCls = a.category === 'Disruption' ? 'badge-high' : a.category === 'Information' ? 'badge-moderate' : 'badge-low';
+          return `
+            <div class="alert-card ${cardCls}">
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px;">
+                  <span class="badge ${badgeCls}">${escapeHtml(a.category)}</span>
+                  <span style="font-size:0.78rem;color:var(--text-muted);">${escapeHtml(a.timestamp)}</span>
+                </div>
+                <h4 style="font-size:1rem;margin-bottom:6px;">${escapeHtml(a.title)}</h4>
+                <p style="font-size:0.86rem;color:var(--text-muted);line-height:1.55;">${escapeHtml(a.description)}</p>
+              </div>
+              <div style="padding-top:10px;border-top:1px solid var(--border-color);font-size:0.8rem;font-weight:600;color:var(--primary);">
+                Affected: ${escapeHtml(a.route)}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      function renderTickets() {
+        const container = document.getElementById('ticketsContainer');
+        document.getElementById('ticketNavCount').textContent = state.tickets.length;
+        document.getElementById('statBookedTickets').textContent = state.tickets.length;
+
+        if (state.tickets.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div style="font-size:2.2rem;margin-bottom:10px;">🎫</div>
+              <h3 style="margin-bottom:6px;">No Prototype Tickets Booked Yet</h3>
+              <p style="color:var(--text-muted);max-width:420px;margin:0 auto 18px;font-size:0.9rem;">
+                Use the Journey Planner to search Bus or Metro routes and generate a prototype ticket saved in your browser.
+              </p>
+              <button class="btn btn-primary" data-nav-target="planner">Go to Journey Planner</button>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = `
+          <div class="tickets-grid">
+            ${state.tickets.map((t) => `
+              <div class="ticket-card">
+                <div class="ticket-top">
+                  <div>
+                    <span style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.06em;color:#93c5fd;">Prototype Boarding Pass</span>
+                    <h4 style="font-size:1.05rem;margin-top:2px;">${escapeHtml(t.routeNumber)} • ${escapeHtml(t.routeName)}</h4>
+                  </div>
+                  <span class="badge" style="background:rgba(255,255,255,0.16);color:#fff;">${escapeHtml(t.ticketId)}</span>
+                </div>
+                <div class="ticket-body">
+                  <div class="ticket-row">
+                    <span style="color:var(--text-muted);">Passenger</span>
+                    <strong>${escapeHtml(t.passengerName)} (${t.passengerCount}x)</strong>
+                  </div>
+                  <div class="ticket-row">
+                    <span style="color:var(--text-muted);">Route</span>
+                    <strong>${escapeHtml(t.origin)} &rarr; ${escapeHtml(t.destination)}</strong>
+                  </div>
+                  <div class="ticket-row">
+                    <span style="color:var(--text-muted);">Travel Date &amp; Time</span>
+                    <strong>${escapeHtml(t.travelDate)} at ${escapeHtml(t.departureTime)}</strong>
+                  </div>
+                  <div class="ticket-row">
+                    <span style="color:var(--text-muted);">Ticket Type</span>
+                    <strong>${escapeHtml(t.ticketType)}</strong>
+                  </div>
+                  <div class="ticket-row">
+                    <span style="color:var(--text-muted);">Total Paid (Demo)</span>
+                    <strong style="color:var(--primary);font-size:1rem;">$${Number(t.totalAmount).toFixed(2)}</strong>
+                  </div>
+                </div>
+                <div class="ticket-footer">
+                  <small style="color:var(--text-muted);font-size:0.74rem;">Booked: ${escapeHtml(t.bookedAt)}</small>
+                  <button class="btn btn-danger btn-sm" onclick="window.deleteTicket('${t.ticketId}')">Delete Ticket</button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      /* ----------------------------------------------------------------------
+         5. JOURNEY PLANNER SEARCH & BOOKING LOGIC
+         ---------------------------------------------------------------------- */
+      function addMinutesToTime(timeStr, minsToAdd) {
+        const [h, m] = timeStr.split(':').map(Number);
+        const total = (h * 60 + m + minsToAdd) % (24 * 60);
+        const nh = String(Math.floor(total / 60)).padStart(2, '0');
+        const nm = String(total % 60).padStart(2, '0');
+        return `${nh}:${nm}`;
+      }
+
+      function handleJourneySearch(e) {
+        if (e) e.preventDefault();
+        const origin = document.getElementById('originInput').value.trim();
+        const destination = document.getElementById('destinationInput').value.trim();
+        const travelDate = document.getElementById('travelDateInput').value;
+        const depTime = document.getElementById('departureTimeInput').value || '09:00';
+
+        if (!origin || !destination) {
+          showToast('Please enter both starting location and destination.');
+          return;
+        }
+
+        if (origin.toLowerCase() === destination.toLowerCase()) {
+          showToast('Origin and destination cannot be the same.');
+          return;
+        }
+
+        // Match routes or generate realistic multi-modal connections
+        let matches = TRANSIT_ROUTES.filter(
+          (r) =>
+            r.origin.toLowerCase().includes(origin.toLowerCase()) ||
+            r.destination.toLowerCase().includes(destination.toLowerCase())
+        );
+
+        if (matches.length < 2) {
+          matches = TRANSIT_ROUTES.slice(0, 3);
+        }
+
+        state.searchResults = matches.map((route, idx) => {
+          const offsetMins = idx * 12;
+          const estDep = addMinutesToTime(depTime, offsetMins);
+          const durNum = parseInt(route.duration, 10) || 25;
+          const estArr = addMinutesToTime(estDep, durNum);
+          return {
+            optionId: `${route.id}-${idx}`,
+            routeNumber: route.number,
+            routeName: route.name,
+            type: route.type,
+            origin,
+            destination,
+            travelDate,
+            departureTime: estDep,
+            arrivalTime: estArr,
+            duration: route.duration,
+            stops: route.stops,
+            fare: route.fare,
+            crowdLevel: route.crowdLevel,
+            crowdPercent: route.crowdPercent,
+            frequency: route.frequency
+          };
+        });
+
+        state.selectedOption = null;
+        document.getElementById('bookingFormPanel').style.display = 'none';
+        renderJourneyResults();
+      }
+
+      function renderJourneyResults() {
+        const container = document.getElementById('journeyResultsContainer');
+        if (state.searchResults.length === 0) {
+          container.innerHTML = '';
+          return;
+        }
+
+        container.innerHTML = state.searchResults.map((opt) => {
+          const isSelected = state.selectedOption && state.selectedOption.optionId === opt.optionId;
+          return `
+            <div class="journey-option-card ${isSelected ? 'selected' : ''}">
+              <div style="flex:1;min-width:250px;">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
+                  <span class="route-code">${escapeHtml(opt.routeNumber)}</span>
+                  <strong style="font-size:1.05rem;">${escapeHtml(opt.routeName)}</strong>
+                  <span class="badge ${opt.type === 'Metro' ? 'badge-metro' : 'badge-bus'}">${opt.type}</span>
+                  <span class="badge ${getCrowdBadgeClass(opt.crowdLevel)}">${opt.crowdLevel} Crowd (${opt.crowdPercent}%)</span>
+                </div>
+                <div style="font-size:0.9rem;font-weight:600;color:var(--text-main);">
+                  ${escapeHtml(opt.origin)} (${opt.departureTime}) &rarr; ${escapeHtml(opt.destination)} (${opt.arrivalTime})
+                </div>
+                <div class="journey-meta">
+                  <span>⏱ Duration: <strong>${opt.duration}</strong></span>
+                  <span>🚏 Stops: <strong>${opt.stops}</strong></span>
+                  <span>🔄 Frequency: <strong>Every ${opt.frequency}</strong></span>
+                </div>
+              </div>
+
+              <div style="display:flex;align-items:center;gap:16px;">
+                <div style="text-align:right;">
+                  <div style="font-size:1.35rem;font-weight:800;color:var(--primary);">$${opt.fare.toFixed(2)}</div>
+                  <small style="color:var(--text-muted);">per passenger</small>
+                </div>
+                <button class="btn ${isSelected ? 'btn-outline' : 'btn-primary'}" onclick="window.selectJourneyOption('${opt.optionId}')">
+                  ${isSelected ? 'Selected' : 'Select & Book'}
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      function updateEstimatedPrice() {
+        if (!state.selectedOption) return;
+        const count = Math.max(1, parseInt(document.getElementById('passengerCountInput').value, 10) || 1);
+        const type = document.getElementById('ticketTypeSelect').value;
+        const multiplier = type === 'Return' ? 2 : 1;
+        const total = state.selectedOption.fare * count * multiplier;
+        document.getElementById('estimatedTotalPrice').textContent = `$${total.toFixed(2)}`;
+      }
+
+      window.selectJourneyOption = function (optionId) {
+        const found = state.searchResults.find((o) => o.optionId === optionId);
+        if (!found) return;
+        state.selectedOption = found;
+        renderJourneyResults();
+
+        const panel = document.getElementById('bookingFormPanel');
+        panel.style.display = 'block';
+        document.getElementById('selectedRouteSummary').textContent =
+          `${found.routeNumber} (${found.routeName}) • ${found.origin} to ${found.destination} on ${found.travelDate} at ${found.departureTime}`;
+        updateEstimatedPrice();
+        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      };
+
+      window.quickBookRoute = function (routeId) {
+        const route = TRANSIT_ROUTES.find((r) => r.id === routeId);
+        if (!route) return;
+        navigateTo('planner');
+        document.getElementById('originInput').value = route.origin;
+        document.getElementById('destinationInput').value = route.destination;
+        handleJourneySearch();
+      };
+
+      function handleBookingSubmit(e) {
+        e.preventDefault();
+        if (!state.selectedOption) return;
+
+        const passengerName = document.getElementById('passengerNameInput').value.trim();
+        const passengerCount = Math.max(1, parseInt(document.getElementById('passengerCountInput').value, 10) || 1);
+        const ticketType = document.getElementById('ticketTypeSelect').value;
+
+        if (!passengerName) {
+          showToast('Please enter the passenger name.');
+          return;
+        }
+
+        const multiplier = ticketType === 'Return' ? 2 : 1;
+        const totalAmount = state.selectedOption.fare * passengerCount * multiplier;
+        const uniqueId = 'TE-' + Math.random().toString(36).substring(2, 7).toUpperCase();
+
+        const newTicket = {
+          ticketId: uniqueId,
+          passengerName,
+          passengerCount,
+          ticketType,
+          routeNumber: state.selectedOption.routeNumber,
+          routeName: state.selectedOption.routeName,
+          origin: state.selectedOption.origin,
+          destination: state.selectedOption.destination,
+          travelDate: state.selectedOption.travelDate,
+          departureTime: state.selectedOption.departureTime,
+          totalAmount,
+          bookedAt: new Date().toLocaleString()
+        };
+
+        state.tickets.unshift(newTicket);
+        saveTicketsToStorage(state.tickets);
+        renderDashboard();
+        renderTickets();
+
+        document.getElementById('ticketBookingForm').reset();
+        document.getElementById('bookingFormPanel').style.display = 'none';
+        state.selectedOption = null;
+        renderJourneyResults();
+
+        showToast(`Booking confirmed! Prototype Ticket ${uniqueId} generated.`);
+        navigateTo('tickets');
+      }
+
+      window.deleteTicket = function (ticketId) {
+        state.tickets = state.tickets.filter((t) => t.ticketId !== ticketId);
+        saveTicketsToStorage(state.tickets);
+        renderDashboard();
+        renderTickets();
+        showToast(`Ticket ${ticketId} removed.`);
+      };
+
+      /* ----------------------------------------------------------------------
+         6. CLIENT-SIDE ZIP PACKAGE GENERATOR (TransitEase_HTML_CSS_JS.zip)
+         ---------------------------------------------------------------------- */
+      async function downloadProjectZip() {
+        if (typeof JSZip === 'undefined') {
+          showToast('ZIP generator library unavailable offline. Save this HTML file directly.');
+          return;
+        }
+
+        showToast('Preparing TransitEase_HTML_CSS_JS.zip...');
+
+        const zip = new JSZip();
+        const folder = zip.folder('TransitEase');
+
+        const cssContent = document.getElementById('main-stylesheet').textContent.trim();
+        const jsContent = document.getElementById('main-script').textContent.trim();
+
+        // Build clean standalone index.html referencing style.css and script.js
+        const docClone = document.documentElement.cloneNode(true);
+        const clonedStyle = docClone.querySelector('#main-stylesheet');
+        if (clonedStyle) {
+          const linkTag = document.createElement('link');
+          linkTag.setAttribute('rel', 'stylesheet');
+          linkTag.setAttribute('href', 'style.css');
+          clonedStyle.replaceWith(linkTag);
+        }
+        const clonedScript = docClone.querySelector('#main-script');
+        if (clonedScript) {
+          const scriptTag = document.createElement('script');
+          scriptTag.setAttribute('src', 'script.js');
+          clonedScript.replaceWith(scriptTag);
+        }
+
+        const cleanHtml = '<!DOCTYPE html>\n' + docClone.outerHTML;
+        const readmeText = [
+          'TransitEase — Smart Public Transportation Website',
+          '==================================================',
+          '',
+          '1. HOW TO RUN:',
+          '   - Extract the TransitEase_HTML_CSS_JS.zip archive.',
+          '   - Open TransitEase/index.html directly in any modern web browser (Chrome, Edge, Firefox, Safari).',
+          '   - No Node.js, npm, or external server installation is required.',
+          '',
+          '2. FOLDER STRUCTURE:',
+          '   TransitEase/',
+          '   ├── index.html   (Semantic HTML5 structure for all 6 pages)',
+          '   ├── style.css    (Responsive CSS3 design system & layout)',
+          '   ├── script.js    (Vanilla JS navigation, search, filters & LocalStorage ticketing)',
+          '   └── README.txt   (Project documentation)',
+          '',
+          '3. DISCLAIMER:',
+          '   All routes, schedules, crowd occupancy levels, and booked tickets are simulated prototype data.'
+        ].join('\n');
+
+        folder.file('index.html', cleanHtml);
+        folder.file('style.css', cssContent);
+        folder.file('script.js', jsContent);
+        folder.file('README.txt', readmeText);
+
+        const blob = await zip.generateAsync({ type: 'blob' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'TransitEase_HTML_CSS_JS.zip';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        showToast('Downloaded TransitEase_HTML_CSS_JS.zip!');
+      }
+
+      /* ----------------------------------------------------------------------
+         7. INITIALIZATION & EVENT LISTENERS
+         ---------------------------------------------------------------------- */
+      document.addEventListener('DOMContentLoaded', () => {
+        // Set default travel date to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('travelDateInput').value = today;
+
+        // Sidebar navigation clicks
+        document.querySelectorAll('.nav-item').forEach((btn) => {
+          btn.addEventListener('click', () => navigateTo(btn.dataset.page));
+        });
+
+        // Delegated quick-navigation buttons
+        document.body.addEventListener('click', (e) => {
+          const targetBtn = e.target.closest('[data-nav-target]');
+          if (targetBtn) {
+            navigateTo(targetBtn.dataset.navTarget);
+          }
+        });
+
+        // Mobile sidebar controls
+        document.getElementById('openSidebarBtn').addEventListener('click', openMobileSidebar);
+        document.getElementById('closeSidebarBtn').addEventListener('click', closeMobileSidebar);
+        document.getElementById('sidebarOverlay').addEventListener('click', closeMobileSidebar);
+
+        // Schedule filter buttons
+        document.getElementById('scheduleFilterBar').addEventListener('click', (e) => {
+          const btn = e.target.closest('.filter-btn');
+          if (!btn) return;
+          document.querySelectorAll('#scheduleFilterBar .filter-btn').forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.scheduleFilter = btn.dataset.filter;
+          renderSchedules();
+        });
+
+        // Alert filter buttons
+        document.getElementById('alertFilterBar').addEventListener('click', (e) => {
+          const btn = e.target.closest('.filter-btn');
+          if (!btn) return;
+          document.querySelectorAll('#alertFilterBar .filter-btn').forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.alertFilter = btn.dataset.alertFilter;
+          renderAlerts();
+        });
+
+        // Journey Planner search & booking listeners
+        document.getElementById('journeySearchForm').addEventListener('submit', handleJourneySearch);
+        document.getElementById('passengerCountInput').addEventListener('input', updateEstimatedPrice);
+        document.getElementById('ticketTypeSelect').addEventListener('change', updateEstimatedPrice);
+        document.getElementById('ticketBookingForm').addEventListener('submit', handleBookingSubmit);
+        document.getElementById('cancelSelectionBtn').addEventListener('click', () => {
+          state.selectedOption = null;
+          document.getElementById('bookingFormPanel').style.display = 'none';
+          renderJourneyResults();
+        });
+
+        // ZIP Download button
+        document.getElementById('downloadZipBtn').addEventListener('click', downloadProjectZip);
+
+        // Initial render of all views
+        renderDashboard();
+        renderSchedules();
+        renderCrowdStatus();
+        renderAlerts();
+        renderTickets();
+        handleJourneySearch();
+      });
+    })();
+  </script>
+</body>
+</html>
